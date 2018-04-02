@@ -2,10 +2,12 @@ package nl.rmoesbergen.mcplugin;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerEggThrowEvent;
+import nl.rmoesbergen.mcplugin.Sphere;
 
 import java.util.logging.Logger;
 
@@ -30,6 +32,11 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		Player player = event.getPlayer();
 
 		Location loc = player.getTargetBlock(null, 0).getLocation();
-		player.getWorld().createExplosion(loc, 4F);
+		
+		if (loc != null) {
+			Sphere sphere = new Sphere();
+			player.getWorld().createExplosion(loc, 0.5F);
+			sphere.Draw(loc, 5F, Material.GLASS);
+		}
 	}
 }
