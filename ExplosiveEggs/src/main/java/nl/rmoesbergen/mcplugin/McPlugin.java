@@ -31,7 +31,6 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		Player player = event.getPlayer();
 
 		Location loc = player.getTargetBlock(null, 0).getLocation();
-		TNTPrimed tnt = player.getWorld().spawn(loc, TNTPrimed.class);
-		tnt.setFuseTicks(0);
+		player.getWorld().createExplosion(loc, 4F);
 	}
 }
