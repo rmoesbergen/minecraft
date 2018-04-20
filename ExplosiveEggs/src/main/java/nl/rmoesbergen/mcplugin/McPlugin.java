@@ -28,7 +28,7 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	public void onEnable() {
 		Logger logger = getLogger();
 		logger.info("McPlugin Enabled");
-		
+
 		getServer().getPluginManager().registerEvents(this, this);
 	}
 
@@ -54,8 +54,7 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		ChangeWorldTask task = new ChangeWorldTask(player);
 		task.runTask(this);
 	}
-	
-	
+
 	@EventHandler
 	public void onEggHits(ProjectileHitEvent event) {
 
@@ -68,25 +67,22 @@ public final class McPlugin extends JavaPlugin implements Listener {
 			world.createExplosion(loc, 4F);
 			sphere.Draw(loc, 5F, Material.GLASS);
 			loc.add(0, 5, 0);
-			for (int count=0; count < 10; count++) {
+			for (int count = 0; count < 10; count++) {
 				world.spawnEntity(loc, EntityType.FIREWORK);
-				//Fireball fireball = (Fireball)world.spawnEntity(loc, EntityType.FIREBALL);
-				//fireball.setDirection(new Vector(loc.getX(), loc.getY()+10F, loc.getZ()));
+				// Fireball fireball = (Fireball)world.spawnEntity(loc, EntityType.FIREBALL);
+				// fireball.setDirection(new Vector(loc.getX(), loc.getY()+10F, loc.getZ()));
 			}
 		}
 	}
 }
-	
-/*	@EventHandler
-	public static void onEggThrown(PlayerEggThrowEvent event) {
-		Player player = event.getPlayer();
 
-		Location loc = player.getTargetBlock(null, 0).getLocation();
-		
-		if (loc != null) {
-			Sphere sphere = new Sphere();
-			player.getWorld().createExplosion(loc, 4F);
-			sphere.Draw(loc, 5F, Material.GLASS);
-		}
-	}
-}*/
+/*
+ * @EventHandler public static void onEggThrown(PlayerEggThrowEvent event) {
+ * Player player = event.getPlayer();
+ * 
+ * Location loc = player.getTargetBlock(null, 0).getLocation();
+ * 
+ * if (loc != null) { Sphere sphere = new Sphere();
+ * player.getWorld().createExplosion(loc, 4F); sphere.Draw(loc, 5F,
+ * Material.GLASS); } } }
+ */
