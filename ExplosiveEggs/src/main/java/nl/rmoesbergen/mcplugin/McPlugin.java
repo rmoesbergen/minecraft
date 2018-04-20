@@ -1,10 +1,13 @@
 package nl.rmoesbergen.mcplugin;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,6 +16,8 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+
 import nl.rmoesbergen.mcplugin.Sphere;
 
 import java.util.logging.Logger;
@@ -35,7 +40,7 @@ public final class McPlugin extends JavaPlugin implements Listener {
 
 	/* Disable player damage */
 	@EventHandler
-	public static void onEntityDamage(EntityDamageEvent event) {
+	public void onEntityDamage(EntityDamageEvent event) {
 		if (event.getEntityType() == EntityType.PLAYER) {
 			if (event.getCause() == DamageCause.FALL) {
 				event.setCancelled(true);
@@ -44,7 +49,15 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	}
 
 	@EventHandler
-	public static void onEggHits(ProjectileHitEvent event) {
+	public void onPlayerMove(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		ChangeWorldTask task = new ChangeWorldTask(player);
+		task.runTask(this);
+	}
+	
+	
+	@EventHandler
+	public void onEggHits(ProjectileHitEvent event) {
 
 		World world = event.getEntity().getWorld();
 
@@ -55,7 +68,11 @@ public final class McPlugin extends JavaPlugin implements Listener {
 			world.createExplosion(loc, 4F);
 			sphere.Draw(loc, 5F, Material.GLASS);
 			loc.add(0, 5, 0);
-			world.spawnEntity(loc, EntityType.FIREWORK);
+			for (int count=0; count < 10; count++) {
+				world.spawnEntity(loc, EntityType.FIREWORK);
+				//Fireball fireball = (Fireball)world.spawnEntity(loc, EntityType.FIREBALL);
+				//fireball.setDirection(new Vector(loc.getX(), loc.getY()+10F, loc.getZ()));
+			}
 		}
 	}
 }
