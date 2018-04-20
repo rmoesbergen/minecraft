@@ -3,9 +3,15 @@ package nl.rmoesbergen.mcplugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
 import nl.rmoesbergen.mcplugin.Sphere;
 
@@ -26,8 +32,35 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		Logger logger = getLogger();
 		logger.info("McPlugin Disabled");
 	}
-	
+
+	/* Disable player damage */
 	@EventHandler
+	public static void onEntityDamage(EntityDamageEvent event) {
+		if (event.getEntityType() == EntityType.PLAYER) {
+			if (event.getCause() == DamageCause.FALL) {
+				event.setCancelled(true);
+			}
+		}
+	}
+
+	@EventHandler
+	public static void onEggHits(ProjectileHitEvent event) {
+
+		World world = event.getEntity().getWorld();
+
+		if (event.getEntityType() == EntityType.EGG) {
+			Location loc = event.getEntity().getLocation();
+
+			Sphere sphere = new Sphere();
+			world.createExplosion(loc, 4F);
+			sphere.Draw(loc, 5F, Material.GLASS);
+			loc.add(0, 5, 0);
+			world.spawnEntity(loc, EntityType.FIREWORK);
+		}
+	}
+}
+	
+/*	@EventHandler
 	public static void onEggThrown(PlayerEggThrowEvent event) {
 		Player player = event.getPlayer();
 
@@ -35,8 +68,8 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		
 		if (loc != null) {
 			Sphere sphere = new Sphere();
-			player.getWorld().createExplosion(loc, 0.5F);
+			player.getWorld().createExplosion(loc, 4F);
 			sphere.Draw(loc, 5F, Material.GLASS);
 		}
 	}
-}
+}*/
