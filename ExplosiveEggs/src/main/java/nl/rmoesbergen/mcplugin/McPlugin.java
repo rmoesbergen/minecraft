@@ -1,28 +1,27 @@
 package nl.rmoesbergen.mcplugin;
 
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import nl.rmoesbergen.mcplugin.Sphere;
 
+import java.util.Objects;
 import java.util.logging.Logger;
 
 public final class McPlugin extends JavaPlugin implements Listener {
+
+	private Location lastPosition;
 
 	@Override
 	public void onEnable() {
@@ -51,8 +50,18 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
-		ChangeWorldTask task = new ChangeWorldTask(player);
-		task.runTask(this);
+		Location loc = player.getLocation();
+
+		if (Objects.isNull(lastPosition)) {
+			lastPosition = loc;
+		}
+		if (loc.getBlockX() != lastPosition.getBlockX() || loc.getBlockY() != lastPosition.getBlockY()
+				|| loc.getBlockZ() != lastPosition.getBlockZ()) {
+
+			ChangeWorldTask task = new ChangeWorldTask(player);
+			task.runTask(this);
+		}
+		lastPosition = loc;
 	}
 
 	@EventHandler
@@ -62,17 +71,29 @@ public final class McPlugin extends JavaPlugin implements Listener {
 
 		if (event.getEntityType() == EntityType.EGG) {
 			Location loc = event.getEntity().getLocation();
+			int radius = 5;
 
-			Sphere sphere = new Sphere();
-			world.createExplosion(loc, 4F);
-			sphere.Draw(loc, 5F, Material.GLASS);
-			loc.add(0, 5, 0);
-			for (int count = 0; count < 10; count++) {
-				world.spawnEntity(loc, EntityType.FIREWORK);
-				// Fireball fireball = (Fireball)world.spawnEntity(loc, EntityType.FIREBALL);
-				// fireball.setDirection(new Vector(loc.getX(), loc.getY()+10F, loc.getZ()));
-			}
-		}
+			int y = loc.getBlockY() + 2;
+			for (int x = loc.getBlockX() - radius; x <= loc.getBlockX() + radius; x++)
+				for (int z = loc.getBlockZ() - radius; z <= loc.getBlockZ() + radius; z++) {
+					if (x == loc.getBlockX() - radius || z == loc.getBlockZ() - radius || x == loc.getBlockX() + radius
+							|| z == loc.getBlockZ() + radius) {
+						Block block = world.getBlockAt(x, y, z);
+						block.setType(Material.FENCE);
+
+						// Location curloc = new Location(world, x, y , z);
+						// world.spawnFallingBlock(curloc, Material.FENCE, (byte)0);
+					}
+				}
+
+			/*
+			 * Sphere sphere = new Sphere(); world.createExplosion(loc, 4F);
+			 * sphere.Draw(loc, 5F, Material.GLASS); loc.add(0, 5, 0); for (int count = 0;
+			 * count < 10; count++) { Firework firework = (Firework)world.spawnEntity(loc,
+			 * EntityType.FIREWORK); //firework.setMetadata(arg0, arg1); // Fireball
+			 * fireball = (Fireball)world.spawnEntity(loc, EntityType.FIREBALL); //
+			 * fireball.setDirection(new Vector(loc.getX(), loc.getY()+10F, loc.getZ())); }
+			 */ }
 	}
 }
 
