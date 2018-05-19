@@ -37,9 +37,11 @@ public class ChangeWorldTask extends BukkitRunnable {
 						block.setType(Material.STATIONARY_LAVA);
 					if (block.getType() == Material.OBSIDIAN)
 						block.setType(Material.STATIONARY_LAVA);
-/*					if (block.getType() == Material.GRASS)
-						block.setType(Material.TNT);
-*/				}
+					if (block.getType() == Material.GRASS)
+						block.setType(Material.NETHERRACK);
+					if (block.getType() == Material.SAND)
+						block.setType(Material.SOUL_SAND);
+				}
 	}
 
 }
