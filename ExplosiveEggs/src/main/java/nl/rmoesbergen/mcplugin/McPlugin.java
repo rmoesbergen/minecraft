@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 public final class McPlugin extends JavaPlugin implements Listener {
 
 	private Location lastPosition;
-	// private boolean devilEnabled = false;
 
 	@Override
 	public void onEnable() {
@@ -46,6 +45,9 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
+
+			if (!player.isOp())
+				return false;
 
 			if (cmd.getName().equalsIgnoreCase("devil")) {
 				boolean devilEnabled = player.hasMetadata("devil");
@@ -113,16 +115,16 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		}
 	}
 
-	private boolean hasJumped = false;
+	//private boolean hasJumped = false;
 
 	@EventHandler
 	public void onJump(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
-		if (event.getFrom().getY() < event.getTo().getY() && !hasJumped) {
+		if (event.getFrom().getY() < event.getTo().getY() && !player.hasMetadata("jumping")) {
 			player.setVelocity(event.getPlayer().getVelocity().add(new Vector(0, 1, 0)));
-			hasJumped = true;
+			player.setMetadata("jumping", new FixedMetadataValue(this, true));
 		} else if (player.isOnGround()) {
-			hasJumped = false;
+			player.removeMetadata("jumping", this);
 		}
 	}
 
