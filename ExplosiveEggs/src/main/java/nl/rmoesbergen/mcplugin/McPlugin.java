@@ -10,6 +10,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -20,17 +21,16 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import nl.rmoesbergen.mcplugin.Sphere;
-import java.util.Objects;
+
+import java.util.Collection;
 import java.util.logging.Logger;
 
 public final class McPlugin extends JavaPlugin implements Listener {
 
-	private Location lastPosition;
-
 	@Override
 	public void onEnable() {
 		Logger logger = getLogger();
-		logger.info("McPlugin Enableddd");
+		logger.info("McPlugin Enabled");
 
 		getServer().getPluginManager().registerEvents(this, this);
 	}
@@ -50,10 +50,23 @@ public final class McPlugin extends JavaPlugin implements Listener {
 				return false;
 
 			if (cmd.getName().equalsIgnoreCase("devil")) {
+				Collection<? extends Player> players = this.getServer().getOnlinePlayers();
+
+				if (args.length > 0) {
+					// Username achter command getikt
+					for (Player p : players) {
+						if (p.getName().equalsIgnoreCase(args[0])) {
+							player.sendMessage("You set devil mode for " + p.getName());
+							player = p;
+							break;
+						}
+					}
+				}
+
 				boolean devilEnabled = player.hasMetadata("devil");
 
 				devilEnabled = !devilEnabled;
-				player.sendMessage("Devil mode " + devilEnabled);
+				player.sendMessage("Devil mode for " + player.getName() + " is now " + devilEnabled);
 				if (devilEnabled)
 					player.setMetadata("devil", new FixedMetadataValue(this, devilEnabled));
 				else
@@ -78,21 +91,12 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	public void onPlayerMove(PlayerMoveEvent event) {
 
 		Player player = event.getPlayer();
-		Location loc = player.getLocation();
 
 		if (!player.hasMetadata("devil"))
 			return;
 
-		if (Objects.isNull(lastPosition)) {
-			lastPosition = loc;
-		}
-		if (loc.getBlockX() != lastPosition.getBlockX() || loc.getBlockY() != lastPosition.getBlockY()
-				|| loc.getBlockZ() != lastPosition.getBlockZ()) {
-
-			ChangeWorldTask task = new ChangeWorldTask(player);
-			task.runTask(this);
-		}
-		lastPosition = loc;
+		ChangeWorldTask task = new ChangeWorldTask(player);
+		task.runTask(this);
 	}
 
 	@EventHandler
@@ -101,6 +105,16 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		World world = event.getEntity().getWorld();
 
 		if (event.getEntityType() == EntityType.EGG) {
+
+			Projectile egg = event.getEntity();
+			if (egg.getShooter() instanceof Player) {
+				Player player = (Player) egg.getShooter();
+
+				if (!player.hasMetadata("devil")) {
+					return;
+				}
+			}
+
 			Location loc = event.getEntity().getLocation();
 
 			Sphere sphere = new Sphere();
@@ -114,8 +128,6 @@ public final class McPlugin extends JavaPlugin implements Listener {
 			}
 		}
 	}
-
-	//private boolean hasJumped = false;
 
 	@EventHandler
 	public void onJump(PlayerMoveEvent event) {
