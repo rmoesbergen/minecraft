@@ -2,8 +2,10 @@ package nl.rmoesbergen.mcplugin;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -14,11 +16,15 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import nl.rmoesbergen.mcplugin.Sphere;
 
@@ -33,6 +39,7 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		logger.info("McPlugin Enabled");
 
 		getServer().getPluginManager().registerEvents(this, this);
+		this.registerRecipe();
 	}
 
 	@Override
@@ -41,10 +48,30 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		logger.info("McPlugin Disabled");
 	}
 
+	private void registerRecipe() {
+		ItemStack camera = new ItemStack(Material.SKULL_ITEM);
+		ItemMeta meta = camera.getItemMeta();
+		meta.setDisplayName("Security Camera");
+		camera.setItemMeta(meta);
+		NamespacedKey key = new NamespacedKey(this, "camera");
+		ShapedRecipe recipe = new ShapedRecipe(key, camera);
+		recipe.shape(" G ", " G ", " R ");
+		recipe.setIngredient('G', Material.GLASS);
+		recipe.setIngredient('R', Material.REDSTONE);
+		this.getServer().addRecipe(recipe);
+	}
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
+
+			if (cmd.getName().equalsIgnoreCase("unfreeze")) {
+				player.removeMetadata("frozen", this);
+				player.setGameMode(GameMode.SURVIVAL);
+				player.setGravity(true);
+				return true;
+			}
 
 			if (!player.isOp())
 				return false;
@@ -132,6 +159,10 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	@EventHandler
 	public void onJump(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
+
+		if (player.hasMetadata("frozen"))
+			event.setCancelled(true);
+
 		if (event.getFrom().getY() < event.getTo().getY() && !player.hasMetadata("jumping")) {
 			player.setVelocity(event.getPlayer().getVelocity().add(new Vector(0, 1, 0)));
 			player.setMetadata("jumping", new FixedMetadataValue(this, true));
@@ -160,6 +191,25 @@ public final class McPlugin extends JavaPlugin implements Listener {
 						// world.spawnFallingBlock(curloc, Material.FENCE, (byte)0);
 					}
 				}
+		}
+	}
+
+	@EventHandler
+	public void onBlockPlaced(BlockPlaceEvent event) {
+		Block block = event.getBlockPlaced();
+
+		if (block.getType() == Material.SKULL) {
+			Player player = event.getPlayer();
+			player.teleport(block.getLocation());
+
+			ItemStack item = player.getInventory().getItemInMainHand();
+			if (item != null & item.hasItemMeta()) {
+				ItemMeta meta = item.getItemMeta();
+				if (meta.getDisplayName().equalsIgnoreCase("Security Camera")) {
+					player.setMetadata("frozen", new FixedMetadataValue(this, true));
+					player.setGameMode(GameMode.SPECTATOR);
+				}
+			}
 		}
 	}
 }
