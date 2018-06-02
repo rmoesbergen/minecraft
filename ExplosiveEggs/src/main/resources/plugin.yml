@@ -8,3 +8,6 @@ commands:
    unfreeze:
       description: Escape from camera mode
       usage: /unfreeze
+   nextcam:
+      description: Switch to next security cam
+      usage: /nextcam

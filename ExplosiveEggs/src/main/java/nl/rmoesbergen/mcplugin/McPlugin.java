@@ -28,6 +28,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import nl.rmoesbergen.mcplugin.Sphere;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
 
@@ -55,9 +56,10 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		camera.setItemMeta(meta);
 		NamespacedKey key = new NamespacedKey(this, "camera");
 		ShapedRecipe recipe = new ShapedRecipe(key, camera);
-		recipe.shape(" G ", " G ", " R ");
+		recipe.shape(" G ", " G ", "IRI");
 		recipe.setIngredient('G', Material.GLASS);
 		recipe.setIngredient('R', Material.REDSTONE);
+		recipe.setIngredient('I', Material.IRON_INGOT);
 		this.getServer().addRecipe(recipe);
 	}
 
@@ -66,10 +68,29 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 
-			if (cmd.getName().equalsIgnoreCase("unfreeze")) {
+			if (cmd.getName().equalsIgnoreCase("nextcam")) {
+				if (!player.hasMetadata("currentcam") || cameraList.size() == 0) {
+					player.sendMessage("You need to place some camera's first!");
+					return false;
+				}
+
+				int currentCam = player.getMetadata("currentcam").get(0).asInt();
+				currentCam++;
+				if (currentCam >= cameraList.size()) {
+					currentCam = 0;
+				}
+
+				player.setMetadata("currentcam", new FixedMetadataValue(this, currentCam));
+				player.teleport(cameraList.get(currentCam));
+				player.setMetadata("frozen", new FixedMetadataValue(this, player.getGameMode().getValue()));
+				player.setGameMode(GameMode.SPECTATOR);
+
+			} else if (cmd.getName().equalsIgnoreCase("unfreeze")) {
+
+				@SuppressWarnings("deprecation")
+				GameMode gmode = GameMode.getByValue((player.getMetadata("frozen").get(0).asInt()));
 				player.removeMetadata("frozen", this);
-				player.setGameMode(GameMode.SURVIVAL);
-				player.setGravity(true);
+				player.setGameMode(gmode);
 				return true;
 			}
 
@@ -119,6 +140,9 @@ public final class McPlugin extends JavaPlugin implements Listener {
 
 		Player player = event.getPlayer();
 
+		if (player.hasMetadata("frozen"))
+			event.setCancelled(true);
+
 		if (!player.hasMetadata("devil"))
 			return;
 
@@ -160,9 +184,6 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	public void onJump(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 
-		if (player.hasMetadata("frozen"))
-			event.setCancelled(true);
-
 		if (event.getFrom().getY() < event.getTo().getY() && !player.hasMetadata("jumping")) {
 			player.setVelocity(event.getPlayer().getVelocity().add(new Vector(0, 1, 0)));
 			player.setMetadata("jumping", new FixedMetadataValue(this, true));
@@ -171,56 +192,39 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		}
 	}
 
-	@EventHandler
-	public void onInteract(PlayerInteractEvent event) {
+	/*
+	 * @EventHandler public void onInteract(PlayerInteractEvent event) {
+	 * 
+	 * if (event.getAction() == Action.RIGHT_CLICK_BLOCK) { Location loc =
+	 * event.getPlayer().getTargetBlock(null, 0).getLocation(); World world =
+	 * event.getPlayer().getWorld();
+	 * 
+	 * int radius = 5; int y = loc.getBlockY(); for (int x = loc.getBlockX() -
+	 * radius; x <= loc.getBlockX() + radius; x++) for (int z = loc.getBlockZ() -
+	 * radius; z <= loc.getBlockZ() + radius; z++) { if (x == loc.getBlockX() -
+	 * radius || z == loc.getBlockZ() - radius || x == loc.getBlockX() + radius || z
+	 * == loc.getBlockZ() + radius) { Block block = world.getBlockAt(x, y, z);
+	 * block.setType(Material.FENCE); } } } }
+	 * 
+	 */
+	ArrayList<Location> cameraList = new ArrayList<Location>();
 
-		if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-			Location loc = event.getPlayer().getTargetBlock(null, 0).getLocation();
-			World world = event.getPlayer().getWorld();
-
-			int radius = 5;
-			int y = loc.getBlockY();
-			for (int x = loc.getBlockX() - radius; x <= loc.getBlockX() + radius; x++)
-				for (int z = loc.getBlockZ() - radius; z <= loc.getBlockZ() + radius; z++) {
-					if (x == loc.getBlockX() - radius || z == loc.getBlockZ() - radius || x == loc.getBlockX() + radius
-							|| z == loc.getBlockZ() + radius) {
-						Block block = world.getBlockAt(x, y, z);
-						block.setType(Material.FENCE);
-
-						// Location curloc = new Location(world, x, y , z);
-						// world.spawnFallingBlock(curloc, Material.FENCE, (byte)0);
-					}
-				}
-		}
-	}
-
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onBlockPlaced(BlockPlaceEvent event) {
 		Block block = event.getBlockPlaced();
 
 		if (block.getType() == Material.SKULL) {
 			Player player = event.getPlayer();
-			player.teleport(block.getLocation());
 
 			ItemStack item = player.getInventory().getItemInMainHand();
 			if (item != null & item.hasItemMeta()) {
 				ItemMeta meta = item.getItemMeta();
 				if (meta.getDisplayName().equalsIgnoreCase("Security Camera")) {
-					player.setMetadata("frozen", new FixedMetadataValue(this, true));
-					player.setGameMode(GameMode.SPECTATOR);
+					cameraList.add(block.getLocation());
+					player.setMetadata("currentcam", new FixedMetadataValue(this, 0));
 				}
 			}
 		}
 	}
 }
-
-/*
- * @EventHandler public static void onEggThrown(PlayerEggThrowEvent event) {
- * Player player = event.getPlayer();
- * 
- * Location loc = player.getTargetBlock(null, 0).getLocation();
- * 
- * if (loc != null) { Sphere sphere = new Sphere();
- * player.getWorld().createExplosion(loc, 4F); sphere.Draw(loc, 5F,
- * Material.GLASS); } } }
- */
