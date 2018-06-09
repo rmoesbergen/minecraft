@@ -5,6 +5,9 @@ commands:
    devil:
       description: Toggle devil mode
       usage: /devil
+   god:
+      description: Toggle god mode
+      usage: /god
    unfreeze:
       description: Escape from camera mode
       usage: /unfreeze

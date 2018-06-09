@@ -15,12 +15,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -113,6 +111,9 @@ public final class McPlugin extends JavaPlugin implements Listener {
 
 				boolean devilEnabled = player.hasMetadata("devil");
 
+				if (player.hasMetadata("god"))
+					return false;
+
 				devilEnabled = !devilEnabled;
 				player.sendMessage("Devil mode for " + player.getName() + " is now " + devilEnabled);
 				if (devilEnabled)
@@ -121,6 +122,35 @@ public final class McPlugin extends JavaPlugin implements Listener {
 					player.removeMetadata("devil", this);
 				return true;
 			}
+
+			if (cmd.getName().equalsIgnoreCase("god")) {
+				Collection<? extends Player> players = this.getServer().getOnlinePlayers();
+
+				if (args.length > 0) {
+					// Username achter command getikt
+					for (Player p : players) {
+						if (p.getName().equalsIgnoreCase(args[0])) {
+							player.sendMessage("You set god mode for " + p.getName());
+							player = p;
+							break;
+						}
+					}
+				}
+
+				boolean godEnabled = player.hasMetadata("god");
+
+				if (player.hasMetadata("devil"))
+					return false;
+
+				godEnabled = !godEnabled;
+				player.sendMessage("God mode for " + player.getName() + " is now " + godEnabled);
+				if (godEnabled)
+					player.setMetadata("god", new FixedMetadataValue(this, godEnabled));
+				else
+					player.removeMetadata("god", this);
+				return true;
+			}
+
 		}
 		return false;
 	}
@@ -143,9 +173,6 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		if (player.hasMetadata("frozen"))
 			event.setCancelled(true);
 
-		if (!player.hasMetadata("devil"))
-			return;
-
 		ChangeWorldTask task = new ChangeWorldTask(player);
 		task.runTask(this);
 	}
@@ -161,7 +188,7 @@ public final class McPlugin extends JavaPlugin implements Listener {
 			if (egg.getShooter() instanceof Player) {
 				Player player = (Player) egg.getShooter();
 
-				if (!player.hasMetadata("devil")) {
+				if (!player.hasMetadata("devil") && !player.hasMetadata("god")) {
 					return;
 				}
 			}
@@ -209,7 +236,6 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	 */
 	ArrayList<Location> cameraList = new ArrayList<Location>();
 
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onBlockPlaced(BlockPlaceEvent event) {
 		Block block = event.getBlockPlaced();
