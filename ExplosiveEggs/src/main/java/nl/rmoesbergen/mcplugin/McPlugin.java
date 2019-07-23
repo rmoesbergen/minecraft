@@ -48,7 +48,7 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	}
 
 	private void registerRecipe() {
-		ItemStack camera = new ItemStack(Material.SKULL_ITEM);
+		ItemStack camera = new ItemStack(Material.LEGACY_SKULL_ITEM);
 		ItemMeta meta = camera.getItemMeta();
 		meta.setDisplayName("Security Camera");
 		camera.setItemMeta(meta);
@@ -240,7 +240,7 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	public void onBlockPlaced(BlockPlaceEvent event) {
 		Block block = event.getBlockPlaced();
 
-		if (block.getType() == Material.SKULL) {
+		if (block.getType() == Material.SKELETON_SKULL) {
 			Player player = event.getPlayer();
 
 			ItemStack item = player.getInventory().getItemInMainHand();

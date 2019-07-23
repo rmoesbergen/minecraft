@@ -1,6 +1,7 @@
 name: McPlugin
 main: nl.rmoesbergen.mcplugin.McPlugin
 version: 1.0
+api-version: 1.13
 commands:
    devil:
       description: Toggle devil mode

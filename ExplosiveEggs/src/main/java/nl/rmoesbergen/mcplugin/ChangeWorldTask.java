@@ -33,10 +33,10 @@ public class ChangeWorldTask extends BukkitRunnable {
 
 						if (block.getType() == Material.WATER)
 							block.setType(Material.LAVA);
-						if (block.getType() == Material.STATIONARY_WATER)
-							block.setType(Material.STATIONARY_LAVA);
+						if (block.getType() == Material.LEGACY_STATIONARY_WATER)
+							block.setType(Material.LEGACY_STATIONARY_LAVA);
 						if (block.getType() == Material.OBSIDIAN)
-							block.setType(Material.STATIONARY_LAVA);
+							block.setType(Material.LEGACY_STATIONARY_LAVA);
 						if (block.getType() == Material.GRASS)
 							block.setType(Material.NETHERRACK);
 						if (block.getType() == Material.SAND)
@@ -51,10 +51,10 @@ public class ChangeWorldTask extends BukkitRunnable {
 
 						if (block.getType() == Material.LAVA)
 							block.setType(Material.WATER);
-						if (block.getType() == Material.STATIONARY_LAVA)
-							block.setType(Material.STATIONARY_WATER);
+						if (block.getType() == Material.LEGACY_STATIONARY_LAVA)
+							block.setType(Material.LEGACY_STATIONARY_WATER);
 						if (block.getType() == Material.OBSIDIAN)
-							block.setType(Material.STATIONARY_WATER);
+							block.setType(Material.LEGACY_STATIONARY_WATER);
 						if (block.getType() == Material.NETHERRACK)
 							block.setType(Material.GRASS);
 						if (block.getType() == Material.SOUL_SAND)
