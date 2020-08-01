@@ -28,16 +28,5 @@ public class Sphere {
 		}
 		session.commit();
 		session.close();
-		/*
-		for (double X = startX - radius; X < startX + radius; X++)
-			for (double Y = startY - radius; Y < startY + radius; Y++)
-				for (double Z = startZ - radius; Z < startZ + radius; Z++)
-
-					if ((X - startX) * (X - startX) + (Y - startY) * (Y - startY)
-							+ (Z - startZ) * (Z - startZ) <= (radius * radius)) {
-						Location loc2 = new Location(world, X, Y, Z);
-						world.getBlockAt(loc2).setType(material);
-					}
-		*/
 	}
 }
