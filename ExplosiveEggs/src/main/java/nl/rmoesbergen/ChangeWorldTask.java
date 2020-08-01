@@ -1,4 +1,4 @@
-package nl.rmoesbergen.mcplugin;
+package nl.rmoesbergen;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,11 +33,9 @@ public class ChangeWorldTask extends BukkitRunnable {
 
 						if (block.getType() == Material.WATER)
 							block.setType(Material.LAVA);
-						if (block.getType() == Material.LEGACY_STATIONARY_WATER)
-							block.setType(Material.LEGACY_STATIONARY_LAVA);
 						if (block.getType() == Material.OBSIDIAN)
-							block.setType(Material.LEGACY_STATIONARY_LAVA);
-						if (block.getType() == Material.GRASS)
+							block.setType(Material.LAVA);
+						if (block.getType() == Material.GRASS_BLOCK)
 							block.setType(Material.NETHERRACK);
 						if (block.getType() == Material.SAND)
 							block.setType(Material.SOUL_SAND);
@@ -51,12 +49,8 @@ public class ChangeWorldTask extends BukkitRunnable {
 
 						if (block.getType() == Material.LAVA)
 							block.setType(Material.WATER);
-						if (block.getType() == Material.LEGACY_STATIONARY_LAVA)
-							block.setType(Material.LEGACY_STATIONARY_WATER);
-						if (block.getType() == Material.OBSIDIAN)
-							block.setType(Material.LEGACY_STATIONARY_WATER);
 						if (block.getType() == Material.NETHERRACK)
-							block.setType(Material.GRASS);
+							block.setType(Material.GRASS_BLOCK);
 						if (block.getType() == Material.SOUL_SAND)
 							block.setType(Material.SAND);
 					}

@@ -1,4 +1,4 @@
-package nl.rmoesbergen.mcplugin;
+package nl.rmoesbergen;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -24,29 +24,29 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import nl.rmoesbergen.mcplugin.Sphere;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
 
-public final class McPlugin extends JavaPlugin implements Listener {
+public final class ExplosiveEggs extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
 		Logger logger = getLogger();
-		logger.info("McPlugin Enabled");
+		logger.info("ExplosiveEggs Enabled");
 
 		getServer().getPluginManager().registerEvents(this, this);
-		this.registerRecipe();
+		//this.registerRecipe();
 	}
 
 	@Override
 	public void onDisable() {
 		Logger logger = getLogger();
-		logger.info("McPlugin Disabled");
+		logger.info("ExplosiveEggs Disabled");
 	}
 
+	/*
 	private void registerRecipe() {
 		ItemStack camera = new ItemStack(Material.LEGACY_SKULL_ITEM);
 		ItemMeta meta = camera.getItemMeta();
@@ -60,39 +60,14 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		recipe.setIngredient('I', Material.IRON_INGOT);
 		this.getServer().addRecipe(recipe);
 	}
+	*/
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 
-			if (cmd.getName().equalsIgnoreCase("nextcam")) {
-				if (!player.hasMetadata("currentcam") || cameraList.size() == 0) {
-					player.sendMessage("You need to place some camera's first!");
-					return false;
-				}
-
-				int currentCam = player.getMetadata("currentcam").get(0).asInt();
-				currentCam++;
-				if (currentCam >= cameraList.size()) {
-					currentCam = 0;
-				}
-
-				player.setMetadata("currentcam", new FixedMetadataValue(this, currentCam));
-				player.teleport(cameraList.get(currentCam));
-				player.setMetadata("frozen", new FixedMetadataValue(this, player.getGameMode().getValue()));
-				player.setGameMode(GameMode.SPECTATOR);
-
-			} else if (cmd.getName().equalsIgnoreCase("unfreeze")) {
-
-				@SuppressWarnings("deprecation")
-				GameMode gmode = GameMode.getByValue((player.getMetadata("frozen").get(0).asInt()));
-				player.removeMetadata("frozen", this);
-				player.setGameMode(gmode);
-				return true;
-			}
-
-			if (!player.isOp())
+			if (!player.hasPermission("explosiveeggs.godmode"))
 				return false;
 
 			if (cmd.getName().equalsIgnoreCase("devil")) {
@@ -165,6 +140,7 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		}
 	}
 
+	/*
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
 
@@ -176,6 +152,7 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		ChangeWorldTask task = new ChangeWorldTask(player);
 		task.runTask(this);
 	}
+	*/
 
 	@EventHandler
 	public void onEggHits(ProjectileHitEvent event) {
@@ -185,28 +162,24 @@ public final class McPlugin extends JavaPlugin implements Listener {
 		if (event.getEntityType() == EntityType.EGG) {
 
 			Projectile egg = event.getEntity();
-			if (egg.getShooter() instanceof Player) {
-				Player player = (Player) egg.getShooter();
+			if (!(egg.getShooter() instanceof Player)) return;
 
-				if (!player.hasMetadata("devil") && !player.hasMetadata("god")) {
-					return;
-				}
-			}
+			Player player = (Player) egg.getShooter();
+			if (!player.hasPermission("explosiveeggs.throw")) return;
 
 			Location loc = event.getEntity().getLocation();
 
 			Sphere sphere = new Sphere();
 			world.createExplosion(loc, 4F);
-			sphere.Draw(loc, 5F, Material.GLASS);
+			sphere.Draw(loc, 5F);
 			loc.add(0, 5, 0);
 			for (int count = 0; count < 10; count++) {
 				world.spawnEntity(loc, EntityType.FIREWORK);
-				// fireball = (Fireball) world.spawnEntity(loc, EntityType.FIREBALL);
-				// fireball.setDirection(new Vector(loc.getX(), loc.getY() + 10F, loc.getZ()));
 			}
 		}
 	}
 
+	/*
 	@EventHandler
 	public void onJump(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
@@ -218,6 +191,7 @@ public final class McPlugin extends JavaPlugin implements Listener {
 			player.removeMetadata("jumping", this);
 		}
 	}
+	*/
 
 	/*
 	 * @EventHandler public void onInteract(PlayerInteractEvent event) {
@@ -234,6 +208,8 @@ public final class McPlugin extends JavaPlugin implements Listener {
 	 * block.setType(Material.FENCE); } } } }
 	 * 
 	 */
+
+	/*
 	ArrayList<Location> cameraList = new ArrayList<Location>();
 
 	@EventHandler
@@ -253,4 +229,6 @@ public final class McPlugin extends JavaPlugin implements Listener {
 			}
 		}
 	}
+	*/
 }
+
