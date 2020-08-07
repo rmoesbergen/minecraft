@@ -19,6 +19,7 @@ permissions:
   explosiveeggs.throw:
     description: Allow player to throw explosive eggs
     default: false
-  explosiveeggs.godmode:
-    description: Allow godmode
+  explosiveeggs.jump:
+    description: Allow high jumping and no fall damage
     default: false
+depend: ["WorldEdit"]
