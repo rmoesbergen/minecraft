@@ -1,5 +1,6 @@
 package nl.rmoesbergen;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sk89q.worldedit.world.block.BlockTypes;
@@ -115,7 +116,7 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
             Player player = (Player) event.getEntity();
             if (!player.hasPermission("explosiveeggs.jump")) return;
 
-            if (event.getCause() == DamageCause.FALL) {
+            if (event.getCause() == DamageCause.FALL || event.getCause() == DamageCause.BLOCK_EXPLOSION) {
                 event.setCancelled(true);
             }
         }
@@ -138,7 +139,8 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
     private void increaseEggBombSize(Player player) {
         if (player.hasMetadata(METADATA_BOMB_RADIUS)) {
             double currentValue = player.getMetadata(METADATA_BOMB_RADIUS).get(0).asDouble();
-            player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, currentValue + 1F));
+            if (currentValue < 15F)
+                player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, currentValue + 1F));
         } else {
             player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, 6F));
         }
@@ -174,18 +176,23 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
         eggLocation.add(0, radius, 0);
         world.spawnEntity(eggLocation, EntityType.FIREWORK);
 
-        // If hitting another player
-        // TODO: improve this to check if hit player is inside player's glass bubble
-        Entity hitEntity = event.getHitEntity();
-        if (hitEntity instanceof Player) {
-            // Increase player's bomb size
-            increaseEggBombSize(player);
+        for (Player hitPlayer: getServer().getOnlinePlayers()) {
+            if (!hitPlayer.getWorld().getName().equals(player.getWorld().getName())) continue;
+            if (hitPlayer.equals(player)) continue;
 
-            // Reset hit player's bomb size
-            Player hitPlayer = (Player) hitEntity;
-            hitPlayer.removeMetadata(METADATA_BOMB_RADIUS, this);
+            double distance = eggLocation.distance(hitPlayer.getLocation());
+            getServer().getLogger().log(Level.INFO, "Distance: " + distance);
+            if (distance <= 2 * radius) {
+                // hitPlayer has been captured
+                getServer().getLogger().log(Level.INFO, "Player hit!");
 
-            player.sendTitle("You hit " + hitPlayer.getName() + "!", "Your bomb size has increased",10,70,20);
+                // Increase player's bomb size
+                increaseEggBombSize(player);
+                player.sendTitle("You hit " + hitPlayer.getName() + "!", "Your bomb size has increased",10,30,20);
+
+                // Reset hit player's bomb size
+                hitPlayer.removeMetadata(METADATA_BOMB_RADIUS, this);
+            }
         }
     }
 
