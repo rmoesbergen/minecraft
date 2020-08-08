@@ -1,15 +1,18 @@
 package nl.rmoesbergen;
 
-import com.sk89q.worldedit.world.block.BlockType;
-import com.sk89q.worldedit.world.block.BlockTypes;
-import org.bukkit.Location;
-
-import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.selector.SphereRegionSelector;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockTypes;
+import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
+
+import java.util.Collections;
 
 // Draw a 3D sphere in MC
 public class Sphere {
@@ -24,19 +27,34 @@ public class Sphere {
 		this.world = new BukkitWorld(location.getWorld());
 	}
 
-	public void Draw(BlockType blockType) {
+	public void Draw(boolean clear) {
 		EditSession session = WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, -1);
+
+		SphereRegionSelector selection = new SphereRegionSelector(world);
+		selection.selectPrimary(location, null);
+		selection.selectSecondary(location.add(0,(int) radius,0), null);
+
+		BaseBlock fromBlock, toBlock;
+
+		if (clear) {
+			fromBlock = BlockTypes.GLASS.getDefaultState().toBaseBlock();
+			toBlock = BlockTypes.AIR.getDefaultState().toBaseBlock();
+		} else {
+			fromBlock = BlockTypes.AIR.getDefaultState().toBaseBlock();
+			toBlock = BlockTypes.GLASS.getDefaultState().toBaseBlock();		}
+
 		try {
-			session.makeSphere(location, blockType.getDefaultState().toBaseBlock(), radius, true);
-		} catch (MaxChangedBlocksException e) {
+			session.replaceBlocks(selection.getRegion(), Collections.singleton(fromBlock), toBlock);
+		} catch (IncompleteRegionException | MaxChangedBlocksException e) {
 			e.printStackTrace();
 		}
+
 		session.commit();
 		session.close();
 	}
 
 	public void Cleanup() {
-		Draw(BlockTypes.AIR);
+		Draw(true);
 	}
 
 

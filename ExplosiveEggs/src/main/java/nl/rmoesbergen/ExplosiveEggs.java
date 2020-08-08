@@ -179,7 +179,7 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
         double radius = getEggBombSize(player);
         getLogger().info("Radius: " + radius);
         Sphere sphere = new Sphere(eggLocation, radius);
-        sphere.Draw(BlockTypes.GLASS);
+        sphere.Draw(false);
         sphere.CleanupAfter(this, 10);
 
         world.createExplosion(eggLocation, 4F);
