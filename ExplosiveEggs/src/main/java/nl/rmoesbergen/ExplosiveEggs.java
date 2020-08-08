@@ -136,14 +136,18 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
 	}
 	*/
 
-    private void increaseEggBombSize(Player player) {
+    private boolean increaseEggBombSize(Player player) {
         if (player.hasMetadata(METADATA_BOMB_RADIUS)) {
             double currentValue = player.getMetadata(METADATA_BOMB_RADIUS).get(0).asDouble();
-            if (currentValue < 15F)
+            if (currentValue < 10F) {
                 player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, currentValue + 1F));
+                return true;
+            }
         } else {
             player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, 6F));
+            return true;
         }
+        return false;
     }
 
     private double getEggBombSize(Player player) {
@@ -173,6 +177,7 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
         double radius = getEggBombSize(player);
         world.createExplosion(eggLocation, 4F);
         sphere.Draw(eggLocation, radius, BlockTypes.GLASS);
+        sphere.CleanupAfter(this, 10);
         eggLocation.add(0, radius, 0);
         world.spawnEntity(eggLocation, EntityType.FIREWORK);
 
@@ -182,13 +187,13 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
 
             double distance = eggLocation.distance(hitPlayer.getLocation());
             getServer().getLogger().log(Level.INFO, "Distance: " + distance);
-            if (distance <= 2 * radius) {
-                // hitPlayer has been captured
-                getServer().getLogger().log(Level.INFO, "Player hit!");
-
+            if (distance < (2 * radius)) {
                 // Increase player's bomb size
-                increaseEggBombSize(player);
-                player.sendTitle("You hit " + hitPlayer.getName() + "!", "Your bomb size has increased",10,30,20);
+                if (increaseEggBombSize(player)) {
+                    player.sendTitle("You hit " + hitPlayer.getName() + "!", "Your bomb size has increased",10,30,20);
+                } else {
+                    player.sendTitle("You hit " + hitPlayer.getName() + "!", null,10,30,20);
+                }
 
                 // Reset hit player's bomb size
                 hitPlayer.removeMetadata(METADATA_BOMB_RADIUS, this);
