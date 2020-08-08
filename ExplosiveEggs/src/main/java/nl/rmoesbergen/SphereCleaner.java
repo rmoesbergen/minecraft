@@ -1,6 +1,5 @@
 package nl.rmoesbergen;
 
-import com.sk89q.worldedit.world.block.BlockTypes;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class SphereCleaner extends BukkitRunnable {
