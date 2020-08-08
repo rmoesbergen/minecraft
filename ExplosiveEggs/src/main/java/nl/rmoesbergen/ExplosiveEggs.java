@@ -1,8 +1,5 @@
 package nl.rmoesbergen;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.sk89q.worldedit.world.block.BlockTypes;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -18,6 +15,9 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class ExplosiveEggs extends JavaPlugin implements Listener {
 
@@ -139,7 +139,7 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
         if (player.hasMetadata(METADATA_BOMB_RADIUS)) {
             double currentValue = player.getMetadata(METADATA_BOMB_RADIUS).get(0).asDouble();
             if (currentValue < 10F) {
-                player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, currentValue + 1F));
+                player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, currentValue + 1));
                 return true;
             }
         } else {
@@ -151,9 +151,13 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
 
     private double getEggBombSize(Player player) {
         if (player.hasMetadata(METADATA_BOMB_RADIUS)) {
-            return player.getMetadata(METADATA_BOMB_RADIUS).get(0).asDouble();
+            if ( player.getMetadata(METADATA_BOMB_RADIUS).size() > 0) {
+                return player.getMetadata(METADATA_BOMB_RADIUS).get(0).asDouble();
+            } else {
+                return 5.0D;
+            }
         } else {
-            return 5F;
+            return 5.0D;
         }
     }
 
@@ -172,11 +176,13 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
         Location eggLocation = egg.getLocation();
 
         // Draw a glass sphere + explosion where the egg hits
-        Sphere sphere = new Sphere();
         double radius = getEggBombSize(player);
-        world.createExplosion(eggLocation, 4F);
-        sphere.Draw(eggLocation, radius, BlockTypes.GLASS);
+        getLogger().info("Radius: " + radius);
+        Sphere sphere = new Sphere(eggLocation, radius);
+        sphere.Draw(BlockTypes.GLASS);
         sphere.CleanupAfter(this, 10);
+
+        world.createExplosion(eggLocation, 4F);
         eggLocation.add(0, radius, 0);
         world.spawnEntity(eggLocation, EntityType.FIREWORK);
 

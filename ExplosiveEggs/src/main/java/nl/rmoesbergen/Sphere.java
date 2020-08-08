@@ -14,20 +14,20 @@ import org.bukkit.plugin.Plugin;
 // Draw a 3D sphere in MC
 public class Sphere {
 
-	public double Radius;
-	public Location Location;
-	private BlockVector3 savedWorldeditLoc;
+	private final double radius;
+	private final BukkitWorld world;
+	private final BlockVector3 location;
 
-	public void Draw(Location loc, double radius, BlockType blockType) {
-		BukkitWorld world = new BukkitWorld(loc.getWorld());
-		Location = loc;
-		Radius = radius;
+	public Sphere(Location location, double radius) {
+		this.location = BlockVector3.at(location.getX(), location.getY(), location.getZ());
+		this.radius = radius;
+		this.world = new BukkitWorld(location.getWorld());
+	}
 
+	public void Draw(BlockType blockType) {
 		EditSession session = WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, -1);
-		savedWorldeditLoc = BlockVector3.at(loc.getX(), loc.getY(), loc.getZ());
-
 		try {
-			session.makeSphere(savedWorldeditLoc, blockType.getDefaultState().toBaseBlock(), radius, false);
+			session.makeSphere(location, blockType.getDefaultState().toBaseBlock(), radius, true);
 		} catch (MaxChangedBlocksException e) {
 			e.printStackTrace();
 		}
@@ -36,16 +36,7 @@ public class Sphere {
 	}
 
 	public void Cleanup() {
-		BukkitWorld world = new BukkitWorld(this.Location.getWorld());
-
-		EditSession session = WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, -1);
-		try {
-			session.makeSphere(savedWorldeditLoc, BlockTypes.AIR.getDefaultState().toBaseBlock(), Radius, false);
-		} catch (MaxChangedBlocksException e) {
-			e.printStackTrace();
-		}
-		session.commit();
-		session.close();
+		Draw(BlockTypes.AIR);
 	}
 
 
