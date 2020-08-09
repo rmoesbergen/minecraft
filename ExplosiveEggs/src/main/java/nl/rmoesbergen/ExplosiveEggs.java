@@ -64,9 +64,14 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
     }
 
     private void playerSpawn(Player player) {
-        if (!player.hasPermission(PERMISSION_THROW)) return;
+        if (!player.hasPermission(PERMISSION_THROW)) {
+            Scores.RemovePlayer(player);
+            return;
+        }
 
-        player.setGameMode(GameMode.ADVENTURE);
+        player.setGameMode(GameMode.CREATIVE);
+
+        Scores.NewPlayer(player);
 
         PlayerInventory inventory = player.getInventory();
         inventory.clear();
@@ -140,13 +145,16 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
 
             double distance = eggLocation.distance(hitPlayer.getLocation());
             getServer().getLogger().log(Level.INFO, "Distance: " + distance);
-            if (distance < (2 * radius)) {
+            if (distance <= Math.ceil(radius + 1)) {
                 // Increase player's bomb size
                 if (increaseEggBombSize(player)) {
                     player.sendTitle("You hit " + hitPlayer.getName() + "!", "Your bomb size has increased",10,30,20);
                 } else {
                     player.sendTitle("You hit " + hitPlayer.getName() + "!", null,10,30,20);
                 }
+
+                // Score!
+                Scores.AddHit(player);
 
                 // Reset hit player's bomb size
                 hitPlayer.removeMetadata(METADATA_BOMB_RADIUS, this);
