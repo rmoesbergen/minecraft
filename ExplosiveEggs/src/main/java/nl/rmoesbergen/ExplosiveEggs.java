@@ -1,6 +1,5 @@
 package nl.rmoesbergen;
 
-import com.sk89q.worldedit.world.block.BlockTypes;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
@@ -23,6 +22,9 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
 
     private static final String METADATA_BOMB_RADIUS = "egg-bomb-radius";
     private static final String METADATA_JUMPING = "jumping";
+    private static final double INITIAL_BOMB_SIZE = 5.0;
+    private static final double MAX_BOMB_SIZE = 10.0;
+
 
     @Override
     public void onEnable() {
@@ -38,75 +40,6 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
         logger.info("ExplosiveEggs Disabled");
     }
 
-	/*
-	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
-
-			if (!player.hasPermission("explosiveeggs.godmode"))
-				return false;
-
-			if (cmd.getName().equalsIgnoreCase("devil")) {
-				Collection<? extends Player> players = this.getServer().getOnlinePlayers();
-
-				if (args.length > 0) {
-					// Username achter command getikt
-					for (Player p : players) {
-						if (p.getName().equalsIgnoreCase(args[0])) {
-							player.sendMessage("You set devil mode for " + p.getName());
-							player = p;
-							break;
-						}
-					}
-				}
-
-				boolean devilEnabled = player.hasMetadata("devil");
-
-				if (player.hasMetadata("god"))
-					return false;
-
-				devilEnabled = !devilEnabled;
-				player.sendMessage("Devil mode for " + player.getName() + " is now " + devilEnabled);
-				if (devilEnabled)
-					player.setMetadata("devil", new FixedMetadataValue(this, devilEnabled));
-				else
-					player.removeMetadata("devil", this);
-				return true;
-			}
-
-			if (cmd.getName().equalsIgnoreCase("god")) {
-				Collection<? extends Player> players = this.getServer().getOnlinePlayers();
-
-				if (args.length > 0) {
-					// Username achter command getikt
-					for (Player p : players) {
-						if (p.getName().equalsIgnoreCase(args[0])) {
-							player.sendMessage("You set god mode for " + p.getName());
-							player = p;
-							break;
-						}
-					}
-				}
-
-				boolean godEnabled = player.hasMetadata("god");
-
-				if (player.hasMetadata("devil"))
-					return false;
-
-				godEnabled = !godEnabled;
-				player.sendMessage("God mode for " + player.getName() + " is now " + godEnabled);
-				if (godEnabled)
-					player.setMetadata("god", new FixedMetadataValue(this, godEnabled));
-				else
-					player.removeMetadata("god", this);
-				return true;
-			}
-
-		}
-		return false;
-	}
-	*/
 
     /* Disable player fall damage */
     @EventHandler
@@ -121,29 +54,10 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
         }
     }
 
-	/*
-	@EventHandler
-	public void onPlayerMove(PlayerMoveEvent event) {
-
-		Player player = event.getPlayer();
-
-		if (player.hasMetadata("frozen"))
-			event.setCancelled(true);
-
-		ChangeWorldTask task = new ChangeWorldTask(player);
-		task.runTask(this);
-	}
-	*/
-
     private boolean increaseEggBombSize(Player player) {
-        if (player.hasMetadata(METADATA_BOMB_RADIUS)) {
-            double currentValue = player.getMetadata(METADATA_BOMB_RADIUS).get(0).asDouble();
-            if (currentValue < 10F) {
-                player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, currentValue + 1));
-                return true;
-            }
-        } else {
-            player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, 6F));
+        double currentValue = getEggBombSize(player);
+        if (currentValue <= MAX_BOMB_SIZE) {
+            player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, currentValue + 1));
             return true;
         }
         return false;
@@ -151,14 +65,12 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
 
     private double getEggBombSize(Player player) {
         if (player.hasMetadata(METADATA_BOMB_RADIUS)) {
-            if ( player.getMetadata(METADATA_BOMB_RADIUS).size() > 0) {
+            if (player.getMetadata(METADATA_BOMB_RADIUS).size() > 0) {
                 return player.getMetadata(METADATA_BOMB_RADIUS).get(0).asDouble();
-            } else {
-                return 5.0D;
             }
-        } else {
-            return 5.0D;
         }
+        player.setMetadata(METADATA_BOMB_RADIUS, new FixedMetadataValue(this, INITIAL_BOMB_SIZE));
+        return INITIAL_BOMB_SIZE;
     }
 
     @EventHandler

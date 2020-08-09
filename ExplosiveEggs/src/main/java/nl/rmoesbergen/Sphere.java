@@ -17,23 +17,18 @@ import java.util.Collections;
 // Draw a 3D sphere in MC
 public class Sphere {
 
-	private final double radius;
-	private final BukkitWorld world;
-	private final BlockVector3 location;
+	private final SphereRegionSelector selection;
 
 	public Sphere(Location location, double radius) {
-		this.location = BlockVector3.at(location.getX(), location.getY(), location.getZ());
-		this.radius = radius;
-		this.world = new BukkitWorld(location.getWorld());
+		BlockVector3 we_location = BlockVector3.at(location.getX(), location.getY(), location.getZ());
+
+		selection = new SphereRegionSelector(new BukkitWorld(location.getWorld()));
+		selection.selectPrimary(we_location, null);
+		selection.selectSecondary(we_location.add(0, (int) Math.ceil(radius),0), null);
 	}
 
 	public void Draw(boolean clear) {
-		EditSession session = WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, -1);
-
-		SphereRegionSelector selection = new SphereRegionSelector(world);
-		selection.selectPrimary(location, null);
-		selection.selectSecondary(location.add(0,(int) radius,0), null);
-
+		EditSession session = WorldEdit.getInstance().getEditSessionFactory().getEditSession(selection.getWorld(), -1);
 		BaseBlock fromBlock, toBlock;
 
 		if (clear) {
@@ -41,7 +36,8 @@ public class Sphere {
 			toBlock = BlockTypes.AIR.getDefaultState().toBaseBlock();
 		} else {
 			fromBlock = BlockTypes.AIR.getDefaultState().toBaseBlock();
-			toBlock = BlockTypes.GLASS.getDefaultState().toBaseBlock();		}
+			toBlock = BlockTypes.GLASS.getDefaultState().toBaseBlock();
+		}
 
 		try {
 			session.replaceBlocks(selection.getRegion(), Collections.singleton(fromBlock), toBlock);
