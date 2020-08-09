@@ -53,9 +53,8 @@ public class Sphere {
 		Draw(true);
 	}
 
-
-	public void CleanupAfter(Plugin plugin, int seconds) {
+	public void CleanupAfter(Plugin plugin, int ticks) {
 		SphereCleaner cleaner = new SphereCleaner(this);
-		cleaner.runTaskLater(plugin, seconds * 20);
+		cleaner.runTaskLater(plugin, ticks);
 	}
 }

@@ -1,6 +1,8 @@
 package nl.rmoesbergen;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -10,10 +12,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
+import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +31,10 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
     private static final String METADATA_JUMPING = "jumping";
     private static final double INITIAL_BOMB_SIZE = 5.0;
     private static final double MAX_BOMB_SIZE = 10.0;
-
+    private static final String PERMISSION_THROW = "explosiveeggs.throw";
+    private static final String PERMISSION_JUMP = "explosiveeggs.jump";
+    private static final int EGG_COOLDOWN_TIME = 5 * 20;
+    private static final int BOMB_CLEANUP_TIME = 10 * 20;
 
     @Override
     public void onEnable() {
@@ -40,13 +50,35 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
         logger.info("ExplosiveEggs Disabled");
     }
 
+    @EventHandler public void onPlayerRespawn(PlayerRespawnEvent event) {
+        playerSpawn(event.getPlayer());
+    }
+
+    @EventHandler public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
+        playerSpawn(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerSpawnLocation(PlayerSpawnLocationEvent event) {
+        playerSpawn(event.getPlayer());
+    }
+
+    private void playerSpawn(Player player) {
+        if (!player.hasPermission(PERMISSION_THROW)) return;
+
+        player.setGameMode(GameMode.ADVENTURE);
+
+        PlayerInventory inventory = player.getInventory();
+        inventory.clear();
+        inventory.addItem(new ItemStack(Material.EGG, 3));
+    }
 
     /* Disable player fall damage */
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getEntityType() == EntityType.PLAYER) {
             Player player = (Player) event.getEntity();
-            if (!player.hasPermission("explosiveeggs.jump")) return;
+            if (!player.hasPermission(PERMISSION_JUMP)) return;
 
             if (event.getCause() == DamageCause.FALL || event.getCause() == DamageCause.BLOCK_EXPLOSION) {
                 event.setCancelled(true);
@@ -83,7 +115,11 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
         if (!(egg.getShooter() instanceof Player)) return;
 
         Player player = (Player) egg.getShooter();
-        if (!player.hasPermission("explosiveeggs.throw")) return;
+        if (!player.hasPermission(PERMISSION_THROW)) return;
+
+        // Give a new egg after cooldown time
+        GiveEggTask give_egg = new GiveEggTask(player);
+        give_egg.runTaskLater(this, EGG_COOLDOWN_TIME);
 
         Location eggLocation = egg.getLocation();
 
@@ -92,7 +128,7 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
         getLogger().info("Radius: " + radius);
         Sphere sphere = new Sphere(eggLocation, radius);
         sphere.Draw(false);
-        sphere.CleanupAfter(this, 10);
+        sphere.CleanupAfter(this, BOMB_CLEANUP_TIME);
 
         world.createExplosion(eggLocation, 4F);
         eggLocation.add(0, radius, 0);
@@ -121,7 +157,7 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
     @EventHandler
     public void onJump(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        if (!player.hasPermission("explosiveeggs.jump")) return;
+        if (!player.hasPermission(PERMISSION_JUMP)) return;
 
         if (event.getFrom().getY() < event.getTo().getY() && !player.hasMetadata(METADATA_JUMPING)) {
             player.setVelocity(event.getPlayer().getVelocity().add(new Vector(0, 1, 0)));
