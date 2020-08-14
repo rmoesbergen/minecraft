@@ -22,7 +22,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class ExplosiveEggs extends JavaPlugin implements Listener {
@@ -145,7 +144,7 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
             if (hitPlayer.equals(player)) continue;
 
             double distance = eggLocation.distance(hitPlayer.getLocation());
-            getServer().getLogger().log(Level.INFO, "Distance: " + distance);
+            getServer().getLogger().info("Distance: " + distance);
             if (distance <= Math.ceil(radius + 1)) {
                 // Increase player's bomb size
                 if (increaseEggBombSize(player)) {
