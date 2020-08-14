@@ -33,8 +33,9 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
     private static final double MAX_BOMB_SIZE = 10.0;
     private static final String PERMISSION_THROW = "explosiveeggs.throw";
     private static final String PERMISSION_JUMP = "explosiveeggs.jump";
-    private static final int EGG_COOLDOWN_TIME = 5 * 20;
-    private static final int BOMB_CLEANUP_TIME = 10 * 20;
+    private static final int EGG_COOLDOWN_TIME = 10 * 20;
+    private static final int EGG_START_COUNT = 5;
+    private static final int BOMB_CLEANUP_TIME = 8 * 20;
 
     @Override
     public void onEnable() {
@@ -69,13 +70,13 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
             return;
         }
 
-        player.setGameMode(GameMode.CREATIVE);
+        player.setGameMode(GameMode.ADVENTURE);
 
         Scores.NewPlayer(player);
 
         PlayerInventory inventory = player.getInventory();
         inventory.clear();
-        inventory.addItem(new ItemStack(Material.EGG, 3));
+        inventory.addItem(new ItemStack(Material.EGG, EGG_START_COUNT));
     }
 
     /* Disable player fall damage */
