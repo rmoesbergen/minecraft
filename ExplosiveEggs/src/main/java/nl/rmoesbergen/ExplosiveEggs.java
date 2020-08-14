@@ -153,6 +153,9 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
                     player.sendTitle("You hit " + hitPlayer.getName() + "!", null,10,30,20);
                 }
 
+                // Let hit player know he has been hit
+                hitPlayer.sendTitle("You were hit by " + player.getName() + "!", "Your bomb size has been reset", 10, 30, 20);
+
                 // Score!
                 Scores.AddHit(player);
 
