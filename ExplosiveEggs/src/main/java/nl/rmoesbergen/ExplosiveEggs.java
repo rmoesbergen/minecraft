@@ -148,7 +148,7 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
 
             double distance = eggLocation.distance(hitPlayer.getLocation());
             getServer().getLogger().info("Distance: " + distance);
-            if (distance <= Math.ceil(radius + 1)) {
+            if (distance <= Math.ceil(radius + 2)) {
                 // Increase player's bomb size
                 if (increaseEggBombSize(player)) {
                     player.sendTitle("You hit " + hitPlayer.getName() + "!", "Your bomb size has increased",10,30,20);
