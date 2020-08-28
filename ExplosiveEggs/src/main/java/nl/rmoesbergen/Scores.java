@@ -13,9 +13,12 @@ public class Scores {
     }
 
     public static void NewPlayer(Player player) {
-        player.setScoreboard(KillsBoard);
-        Score score = Hits.getScore(player.getName());
-        score.setScore(0);
+        try {
+            player.setScoreboard(KillsBoard);
+            Score score = Hits.getScore(player.getName());
+            score.setScore(0);
+        } catch (IllegalStateException e) {
+        }
     }
 
     public static void RemovePlayer(Player player) {

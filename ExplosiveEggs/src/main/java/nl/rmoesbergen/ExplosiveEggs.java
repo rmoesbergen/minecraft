@@ -13,6 +13,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -53,6 +54,8 @@ public final class ExplosiveEggs extends JavaPlugin implements Listener {
     @EventHandler public void onPlayerRespawn(PlayerRespawnEvent event) {
         playerSpawn(event.getPlayer());
     }
+
+    @EventHandler public void onPlayerJoin(PlayerJoinEvent event) { playerSpawn(event.getPlayer());}
 
     @EventHandler public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
         playerSpawn(event.getPlayer());
