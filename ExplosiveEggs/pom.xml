@@ -9,8 +9,8 @@
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-compiler-plugin</artifactId>
               <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
+                  <source>11</source>
+                  <target>11</target>
               </configuration>
           </plugin>
       </plugins>
@@ -31,14 +31,14 @@
            <groupId>org.bukkit</groupId>
            <artifactId>bukkit</artifactId>
            <!--change this value depending on the version or use LATEST-->
-           <version>1.15.2-R0.1-SNAPSHOT</version>
+           <version>LATEST</version>
            <type>jar</type>
            <scope>provided</scope>
        </dependency>
        <dependency>
            <groupId>org.spigotmc</groupId>
            <artifactId>spigot-api</artifactId>
-           <version>1.16.1-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
+           <version>1.17.1-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
            <type>jar</type>
            <scope>provided</scope>
        </dependency>
